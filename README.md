@@ -1,3 +1,5 @@
+Here is your completely formatted text, perfectly cleaned up with proper code and configuration spacing so it is completely ready to be used.
+
 # Smart Library Front Desk Voice Agent
 
 An asynchronous, AI-powered voice assistant framework designed to handle public library front-desk operations. The system features semantic vector search, live database verification, automated reservations, and robust security guardrails to streamline caller interactions seamlessly.
@@ -25,30 +27,30 @@ An asynchronous, AI-powered voice assistant framework designed to handle public 
 * Async Database Driver: Motor
 
 ---
+
 ## Prerequisites & Environment Setup
 
-Create a `.env` file in your root directory containing your API credentials and database URI strings:
+Create a file named .env in your root directory containing your API credentials and database URI strings:
 
-```env
 LIVEKIT_URL=your_livekit_url
 LIVEKIT_API_KEY=your_livekit_api_key
 LIVEKIT_API_SECRET=your_livekit_api_secret
 GEMINI_API_KEY=your_gemini_api_key
 MONGO_URI=your_mongodb_atlas_connection_string
 
-# MongoDB Atlas Vector Search Index Configuration
+### MongoDB Atlas Vector Search Index Configuration
+
 To execute semantic search queries successfully, define the following Atlas Search Index on your books collection and name it vector_index:
 
-JSON
 {
-  "fields": [
-    {
-      "type": "vector",
-      "path": "embedding",
-      "numDimensions": 384,
-      "similarity": "cosine"
-    }
-  ]
+"fields": [
+{
+"type": "vector",
+"path": "embedding",
+"numDimensions": 384,
+"similarity": "cosine"
+}
+]
 }
 
 ---
