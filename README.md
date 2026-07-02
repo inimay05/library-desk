@@ -1,4 +1,3 @@
-Here is your completely formatted text, perfectly cleaned up with proper code and configuration spacing so it is completely ready to be used.
 
 # Smart Library Front Desk Voice Agent
 
