@@ -14,7 +14,7 @@ Caller (voice) → LiveKit → Gemini Live (Luna) → function tools → FastAPI
                                    └── call transcript → saidso (checks phone numbers)
 ```
 
-Luna verifies the caller by phone number first, then uses six tools: `verify_caller`, `search_books`, `get_reservations`, `make_reservation`, `update_reservation` and `cancel_reservation`. Each tool calls the FastAPI backend, which reads and writes MongoDB Atlas.
+Luna is instructed to verify the caller by phone number first. It then uses six tools: `verify_caller`, `search_books`, `get_reservations`, `make_reservation`, `update_reservation` and `cancel_reservation`. Each tool calls the FastAPI backend, which reads and writes MongoDB Atlas.
 
 ---
 
@@ -24,7 +24,7 @@ Luna verifies the caller by phone number first, then uses six tools: `verify_cal
   Replaces keyword search with MongoDB Atlas Vector Search using the `all-MiniLM-L6-v2` embedding model, so callers can find books by topic or idea instead of exact title.
 
 - **Database-Grounded Summaries (RAG)**  
-  Book descriptions are retrieved from MongoDB and passed into the model's context through the search tool. If a book has no stored description, the tool returns "No description provided" instead of leaving the model to fill the gap.
+  Book descriptions are retrieved from MongoDB and passed into the model's context through the search tool. If a book has no stored description, the tool returns "No description provided" instead of leaving the model to fill the gap. This reduces, but does not eliminate, the chance of the model adding detail of its own.
 
 - **Grounded Phone Numbers**  
   The phone number used to verify a caller or make a reservation is checked against the transcript of what the caller actually said, using saidso. See [Reliability](#reliability).
@@ -41,15 +41,24 @@ Luna verifies the caller by phone number first, then uses six tools: `verify_cal
 
 A voice agent acts on what it hears, so a misheard or invented phone number could put a reservation on the wrong person's account. Luna uses [saidso](https://github.com/KarthikRommula/saidso), a grounding library by Karthik Rommula, to guard against this.
 
-- The agent adds each turn of the conversation to a running transcript.
+- Each turn of the conversation is added to a running transcript.
 - Before `verify_caller` and `make_reservation` run, saidso checks that the phone number appears in what the caller said (`Policy.SPOKEN`).
-- If it does not, the action is blocked, the agent is told to re-ask, and the decision is logged in the terminal.
+- If it does not, the action is blocked, the agent is told to ask again, and the decision is logged in the terminal.
 
-### Limitations
+### Scope of Grounding
 
-- Only phone numbers are grounded in code. Book IDs and pickup dates are not.
-- `update_reservation` and `cancel_reservation` are not guarded by saidso. Reservation IDs are protected only by the instructions in `agent.py`, which tell Luna to use IDs returned by `get_reservations`.
-- Grounding is only as accurate as the speech transcription. If the transcript itself is wrong, a wrong number can still pass.
+Not every argument is checked the same way, because they come from different places:
+
+- **Phone numbers** are spoken by the caller, so they are checked against the call transcript.
+- **Book IDs and reservation IDs** are never spoken. They are returned by `search_books` and `get_reservations`, so a speech-based check does not apply. Luna is instructed in `agent.py` to use only IDs returned by those tools.
+- **Pickup dates** are spoken in many forms ("next Tuesday", "the twelfth") and converted by the agent, so a literal match against the transcript is unreliable.
+
+### Known Gaps
+
+- `update_reservation` and `cancel_reservation` are not guarded by saidso. Checking their IDs against earlier tool results (saidso's provenance checks) is a possible next step.
+- The backend returns "not found" for unknown reservation IDs, but it does not check that a reservation belongs to the verified caller. A valid ID belonging to someone else would be accepted.
+- Verifying the caller first is required by Luna's instructions, not enforced in code.
+- Grounding is only as accurate as the speech transcription. If the transcript is wrong, a wrong number can still pass.
 - The transcript is kept at module level, so the agent is designed for one call at a time.
 
 ---
