@@ -55,7 +55,7 @@ Not every argument is checked the same way, because they come from different pla
 
 ### Known Gaps
 
-- `update_reservation` and `cancel_reservation` are not guarded by saidso. Checking their IDs against earlier tool results (saidso's provenance checks) is a possible next step.
+- `update_reservation` and `cancel_reservation` are not guarded by saidso (currently handled through the instructions in `agent.py`, which tell Luna to use only IDs returned by `get_reservations`, and by the backend, which returns "not found" for unknown IDs). Checking their IDs against earlier tool results (saidso's provenance checks) is a possible next step.
 - The backend returns "not found" for unknown reservation IDs, but it does not check that a reservation belongs to the verified caller. A valid ID belonging to someone else would be accepted.
 - Verifying the caller first is required by Luna's instructions, not enforced in code.
 - Grounding is only as accurate as the speech transcription. If the transcript is wrong, a wrong number can still pass.
